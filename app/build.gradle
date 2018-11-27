@@ -27,7 +27,22 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+        // used by Room, to test migrations
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments = ["room.schemaLocation":
+                                     "$projectDir/schemas".toString()]
+            }
+        }
     }
+
+    // used by Room, to test migrations
+    sourceSets {
+        androidTest.assets.srcDirs +=
+                files("$projectDir/schemas".toString())
+    }
+    
     buildTypes {
         release {
             minifyEnabled false
@@ -44,4 +59,19 @@ dependencies {
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
     implementation 'androidx.recyclerview:recyclerview:1.0.0'
+
+
+    //room library
+    def room_version = "2.0.0-rc01"
+
+    implementation "androidx.room:room-runtime:$room_version"
+    annotationProcessor "androidx.room:room-compiler:$room_version" // use kapt for Kotlin
+
+    //for those who are having issues with androidx uncomment the lines below
+//    def room_version_pre = "1.1.1"
+//
+//    implementation "android.arch.persistence.room:runtime:$room_version_pre"
+//    annotationProcessor "android.arch.persistence.room:compiler:$room_version_pre" // use kapt for Kotlin
+
+
 }
