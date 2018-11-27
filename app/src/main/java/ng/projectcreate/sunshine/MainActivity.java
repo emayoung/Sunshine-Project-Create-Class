@@ -25,10 +25,12 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Array;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class MainActivity extends AppCompatActivity {
@@ -47,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
         //get a handle to the shared pref
         SharedPreferences sharedPreferences = this.getSharedPreferences("sunshine",
                 Context.MODE_PRIVATE);
-        String weatherData = getSavedWeatherDataInSharedPreference();
+        List<WeatherData> weatherData = getDataInDatabase();
 
         if(weatherData.isEmpty()){
             Toast.makeText(this, "You are a JJC",
@@ -55,8 +57,14 @@ public class MainActivity extends AppCompatActivity {
             fetchDataFromNetwork();
 
         } else {
-            Toast.makeText(this, "Weather data \n" + weatherData,
-                    Toast.LENGTH_LONG).show();
+
+            progressBar.setVisibility(View.GONE);
+            WeatherAdapter weatherAdapter = new WeatherAdapter(MainActivity.this,
+                    new ArrayList<WeatherData>(weatherData));
+            weatherRecyclerview.setLayoutManager(new LinearLayoutManager(MainActivity.this));
+            weatherRecyclerview.addItemDecoration(new DividerItemDecoration(MainActivity.this, DividerItemDecoration.VERTICAL));
+            weatherRecyclerview.setAdapter(weatherAdapter);
+
         }
 
     }
@@ -180,7 +188,7 @@ public class MainActivity extends AppCompatActivity {
                 weatherRecyclerview.setAdapter(weatherAdapter);
 
                 //save this data in the database
-                saveDataInSharedPreference(weatherDataArrayList);
+                saveDataInDatabase(weatherDataArrayList);
 
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -199,6 +207,15 @@ public class MainActivity extends AppCompatActivity {
         //weather_data is the key we are using to store the weather data arraylist
         editor.putString("weather_data", weatherDataArrayList.toString());
         editor.commit();
+    }
+
+
+    private void saveDataInDatabase(ArrayList<WeatherData> weatherDataArrayList){
+        SunshineDatabase.createDb(this).weatherDataDao().insertAll(weatherDataArrayList);
+    }
+
+    private List<WeatherData> getDataInDatabase() {
+        return SunshineDatabase.createDb(this).weatherDataDao().getAllWeatherData();
     }
 
     public String getSavedWeatherDataInSharedPreference(){

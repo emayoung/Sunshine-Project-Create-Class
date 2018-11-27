@@ -1,9 +1,16 @@
 package ng.projectcreate.sunshine;
 
+import androidx.room.Entity;
+import androidx.room.Ignore;
+import androidx.room.PrimaryKey;
+
 /**
  * Created by Emem on 11/13/18.
  */
+@Entity(tableName = "weatherData")
 public class WeatherData {
+    @PrimaryKey(autoGenerate = true)
+    int id;
     int imageResource;
     String weatherData;
     String date;
@@ -11,10 +18,19 @@ public class WeatherData {
     public WeatherData() {
     }
 
+//    @Ignore
     public WeatherData(int imageResource, String weatherData, String date) {
         this.imageResource = imageResource;
         this.weatherData = weatherData;
         this.date = date;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public WeatherData(String weatherData, String date) {
