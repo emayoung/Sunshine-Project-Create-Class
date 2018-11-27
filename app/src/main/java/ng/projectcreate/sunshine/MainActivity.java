@@ -44,7 +44,21 @@ public class MainActivity extends AppCompatActivity {
         weatherRecyclerview = findViewById(R.id.recyclerview_weather);
         progressBar = findViewById(R.id.progressbar);
 
-        fetchDataFromNetwork();
+        //get a handle to the shared pref
+        SharedPreferences sharedPreferences = this.getSharedPreferences("sunshine",
+                Context.MODE_PRIVATE);
+        String weatherData = getSavedWeatherDataInSharedPreference();
+
+        if(weatherData.isEmpty()){
+            Toast.makeText(this, "You are a JJC",
+                    Toast.LENGTH_SHORT).show();
+            fetchDataFromNetwork();
+
+        } else {
+            Toast.makeText(this, "Weather data \n" + weatherData,
+                    Toast.LENGTH_LONG).show();
+        }
+
     }
 
     private void fetchDataFromNetwork(){
@@ -146,6 +160,7 @@ public class MainActivity extends AppCompatActivity {
         protected String doInBackground(String... strings) {
             //get the built Url
             URL url = buildApiUrlEndpoint();
+            Log.e("tag", "url endpoint " + url);
             //get data from server
             String weatherData = getWeatherDataFromUrl(url);
             return weatherData;
@@ -165,7 +180,7 @@ public class MainActivity extends AppCompatActivity {
                 weatherRecyclerview.setAdapter(weatherAdapter);
 
                 //save this data in the database
-
+                saveDataInSharedPreference(weatherDataArrayList);
 
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -177,9 +192,23 @@ public class MainActivity extends AppCompatActivity {
     private void saveDataInSharedPreference(ArrayList<WeatherData> weatherDataArrayList){
         //get a handle to the shared preference of our app
         Context context = this;
-        SharedPreferences sharedPref = context.getSharedPreferences("sunshine", Context.MODE_PRIVATE);
+        SharedPreferences sharedPref = context
+                .getSharedPreferences("sunshine", Context.MODE_PRIVATE);
 
-        
+        SharedPreferences.Editor editor = sharedPref.edit();
+        //weather_data is the key we are using to store the weather data arraylist
+        editor.putString("weather_data", weatherDataArrayList.toString());
+        editor.commit();
+    }
+
+    public String getSavedWeatherDataInSharedPreference(){
+        //get a handle to the shared preference of our app
+        Context context = this;
+        SharedPreferences sharedPref = context
+                .getSharedPreferences("sunshine", Context.MODE_PRIVATE);
+
+        String weatherData = sharedPref.getString("weather_data", "");
+        return weatherData;
     }
 
 
@@ -187,6 +216,7 @@ public class MainActivity extends AppCompatActivity {
         ArrayList<WeatherData> weatherDataArrayList = new ArrayList<>();
 
         //convert the json string to json object
+        Log.e("tag", "weather data " + weather);
         JSONObject jsonDataFromServer =new JSONObject(weather);
         JSONArray weatherJsonArray = jsonDataFromServer.getJSONArray("list");
 
